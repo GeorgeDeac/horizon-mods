@@ -5,16 +5,17 @@ and resource packs, each one reviewed before it is published. Browse them at
 [playhorizon.dev/mods](https://playhorizon.dev/mods) or in the launcher (Mods, then Horizon beside Modrinth).
 
 Players install from here through the launcher, which checks every file's SHA-256 and, when the author signs, its
-signature before the game sees it. Sandboxed `.hmod` mods run in Horizon's sandbox,
-with no file, network or clock access, and can only do what their page lists.
+signature before the game sees it. Content mods (`.hmod`) are data and assets only (blocks, items, recipes, loot, tags,
+models, textures, structures), with no code: the game reads them when it starts
+([docs/mods.md](https://github.com/horizon-rust/horizon/blob/main/docs/mods.md)). An older `.hmod` that still carries
+code (`mod.wasm`) doesn't run any more: it needs a native port.
 
-Native source mods (`.hnmod`, kind `native-mod`) are built into an isolated game by
-a launcher with native-mod support. They run with the player’s account permissions.
+Native source mods (`.hnmod`, kind `native-mod`) are how a mod brings code. They are built into an isolated game by
+a launcher with native-mod support. They are not sandboxed: they run with the player’s account permissions.
 Their bundles pin the exact Horizon and Horizon Mixins revisions used for the build.
 Other revisions have not been validated. Registry checks inspect the source bundle without
 executing native code; reviewers must also examine the source and pinned-build
-validation. Publishing these requires the native-mod changes to `cargo-horizon-mod`
-and the launcher to have shipped first.
+validation.
 
 **Who is responsible.** Except the projects marked Official (made by the Horizon project), everything here is made and
 owned by its own authors, not by the Horizon project or its maintainers. A listing is not an endorsement. See the
@@ -26,8 +27,8 @@ whose source reviewers can read, and how to have a project taken down.
 Use the form at [playhorizon.dev/mods/submit](https://playhorizon.dev/mods/submit): sign in with GitHub, pick the file
 and fill in the page. The form checks the file, uploads it here and opens a pull request for you. Then:
 
-1. This repository's checks run on it: the file's own checks, a trial run of a mod in the sandbox, the index it would
-   publish. Their report is in the pull request's checks.
+1. This repository's checks run on it: the file's own checks (a `.hmod` must be content only: one with code is
+   refused), the index it would publish. Nothing in a submission is run. Their report is in the pull request's checks.
 2. A reviewer (see [`.github/CODEOWNERS`](.github/CODEOWNERS)) reads the entry, the source and the report, and asks
    for changes in the pull request if needed.
 3. Merging publishes it: the file becomes a release, the project appears on the site and in the launcher within
@@ -41,9 +42,9 @@ cargo install --git https://github.com/horizon-rust/horizon cargo-horizon-mod
 cargo horizon-mod check target/horizon-mod/my_mod.hmod
 ```
 
-**Updates** come the same way: the form adds a version to your entry, and a reviewer reads it before it is
-published. Only an entry's `owners` can add versions, and every version of a native mod is reviewed, owner or
-not: its code runs with the player's account permissions. A published file never changes: publish a new version.
+**Updates** come the same way: the form adds a version to your entry, and a reviewer reads it and its source before
+it is published. Only an entry's `owners` can add versions, and every version is reviewed, whoever sends it: a native
+mod's code runs with the player's account permissions. A published file never changes: publish a new version.
 
 **Signing** is optional and recommended: put your [minisign](https://jedisct1.github.io/minisign/) public key in your
 entry, and every later version must be signed with it, so nobody else can publish an update in your name.
